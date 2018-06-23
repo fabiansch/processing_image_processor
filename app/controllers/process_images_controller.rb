@@ -1,6 +1,8 @@
 class ProcessImagesController < ApplicationController
 
   def create
+    processing_starting_time = Time.now
+
     data_url = params['base64'];
     data_url = remove_mime_type(data_url);
 
@@ -16,12 +18,12 @@ class ProcessImagesController < ApplicationController
       i.colorspace "Gray"
     end
 
-    before_while = Time.now
-    while (Time.now - before_while) < 5.seconds
-    end
-
     file_content = open(image.path) { |f| f.read }
     payload = {"base64": Base64.strict_encode64(file_content)}
+
+    while (Time.now - processing_starting_time).to_f * 1000 < params['minimum_process_time'].to_f
+    end
+
     render json: payload
   end
 
